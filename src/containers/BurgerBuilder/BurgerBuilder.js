@@ -26,8 +26,8 @@ class BurgerBuilder extends Component {
         error: null
     }
 
-    UNSAFE_componentWillMount() {
-        axios.get('/ingredients')
+    componentDidMount() {
+        axios.get('/ingredients.json')
             .then(response => {
                 this.setState({
                     ingredients: response.data
@@ -94,34 +94,17 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        // alert('You can continue');
-        this.setState({
-            loading: true
-        })
-        const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: 'Alex',
-                address: {
-                    street: 'Rue pipou',
-                    zipCode: '16100',
-                    country: 'France'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
-        }
-        axios.post('/orders.json', order)
-            .then(response => console.log(response))
-            .catch(error => console.log(error))
-            .then(() => {
-                this.setState({
-                    loading: false,
-                    purchasing: false
-                })
-            });
 
+        const queryParams= [];
+        for(let i in this.state.ingredients){
+            queryParams.push(encodeURIComponent(i)+'='+encodeURIComponent(this.state.ingredients[i]));
+        }
+        queryParams.push('price='+this.state.totalPrice);
+        const queryString= queryParams.join('&');
+        this.props.history.push({
+            pathname: '/checkout',
+            search: '?'+queryString
+        });
     }
 
     render() {
@@ -133,7 +116,7 @@ class BurgerBuilder extends Component {
         }
 
         let orderSummary = null;
-        let burger = this.state.error ? <p style={{ textAlign: 'center'}}>Ingredients can't be loaded </p> : <Spinner/>;
+        let burger = this.state.error ? <p style={{textAlign: 'center'}}>Ingredients can't be loaded </p> : <Spinner/>;
         if (this.state.ingredients) {
             burger = (
                 <Aux>
