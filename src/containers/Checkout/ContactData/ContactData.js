@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import Button from "../../../components/UI/Button/Button";
 import classes from "./ContactData.module.css";
-import axios from "./../../../config/axios-orders";
+import axios from "../../../config/axiosOrders";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
 import {connect} from "react-redux";
@@ -157,8 +157,8 @@ class ContactData extends Component {
         updatedOrderForm[inputIdentifier] = updatedFormElement;
 
         let formIsValid = true;
-        for(let inputIdentifier in updatedOrderForm){
-            formIsValid = updatedOrderForm[inputIdentifier].valid && formIsValid;
+        for(let inputId in updatedOrderForm){
+            formIsValid = updatedOrderForm[inputId].valid && formIsValid;
         }
 
         this.setState({

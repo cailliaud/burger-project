@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Order from "../../components/Order/Order";
-import axios from "../../config/axios-orders";
+import axios from "../../config/axiosOrders";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
@@ -27,7 +27,7 @@ class Orders extends Component {
                         loading: false
                     });
                 }
-            ).catch(error =>
+            ).catch(() =>
             this.setState({
                 loading: false
             })
