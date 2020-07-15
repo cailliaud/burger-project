@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
 import CheckoutSummary from "../../components/Order/CheckoutSummary/CheckoutSummary";
-import {Route} from "react-router-dom";
+import {Redirect, Route} from "react-router-dom";
 import ContactData from "./ContactData/ContactData";
 import {connect} from "react-redux";
+import * as actions from "../../store/actions";
 
 class Checkout extends Component {
+
 
     onCheckoutCancelled = () => {
         this.props.history.goBack();
@@ -15,15 +17,24 @@ class Checkout extends Component {
     }
 
     render() {
+        let summary = <Redirect to="/"/>;
+        if (this.props.ingredients) {
+            const purchasedRedirect = this.props.purchases ? <Redirect to="/"/> : null;
+            summary = (
+                <React.Fragment>
+                    {purchasedRedirect}
+                    <CheckoutSummary
+                        ingredients={this.props.ingredients}
+                        onCheckoutCancelled={this.onCheckoutCancelled}
+                        onCheckoutContinued={this.onCheckoutContinued}
+                    />
+                    <Route path={this.props.match.path + '/contact-data'}
+                           component={ContactData}/>
+                </React.Fragment>);
+        }
         return (
             <div>
-                <CheckoutSummary
-                    ingredients={this.props.ingredients}
-                    onCheckoutCancelled={this.onCheckoutCancelled}
-                    onCheckoutContinued={this.onCheckoutContinued}
-                />
-                <Route path={this.props.match.path + '/contact-data'}
-                    component={ContactData}/>
+                {summary}
             </div>
         );
     }
@@ -31,8 +42,9 @@ class Checkout extends Component {
 
 const mapStateToProps = state => {
     return {
-        ingredients: state.ingredients,
-        price: state.totalPrice
+        ingredients: state.burgerBuilder.ingredients,
+        price: state.burgerBuilder.totalPrice,
+        purchases: state.orders.purchased
     }
 }
 
