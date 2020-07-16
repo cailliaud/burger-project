@@ -1,20 +1,68 @@
-import React from 'react';
+import React, {Component, Suspense} from 'react';
 import Layout from './hoc/Layout/Layout';
 import BurgerBuilder from "./containers/BurgerBuilder/BurgerBuilder";
-import Checkout from "./containers/Checkout/Checkout";
-import {Route} from "react-router-dom";
-import Orders from "./containers/Orders/Orders";
 
-function App() {
-  return (
-    <div>
-      <Layout>
-        <Route path="/checkout"  component={Checkout} />
-        <Route path="/orders"  component={Orders} />
-        <Route path="/" exact component={BurgerBuilder} />
-      </Layout>
-    </div>
-  );
+import {Redirect, Route, Switch} from "react-router-dom";
+import {connect} from "react-redux";
+import * as actions from "./store/actions/index";
+import Spinner from "./components/UI/Spinner/Spinner";
+import Logout from "./containers/Auth/Logout/Logout";
+
+const Orders = React.lazy(() => import('./containers/Orders/Orders'));
+const Checkout = React.lazy(() => import('./containers/Checkout/Checkout'));
+const Auth = React.lazy(() => import('./containers/Auth/Auth'));
+
+
+class App extends Component {
+    componentDidMount() {
+        this.props.onTryAutoSignup();
+    }
+
+    render() {
+
+        let routes = (
+            <Suspense fallback={<Spinner/>}>
+                <Switch>
+                    <Route path="/auth" component={Auth}/>
+                    <Route path="/" exact component={BurgerBuilder}/>
+                    <Redirect to="/"/>
+                </Switch>
+            </Suspense>
+        );
+        if (this.props.isAuthenticated) {
+            routes =
+                <Suspense fallback={<Spinner/>}>
+                    <Switch>
+                        <Route path="/checkout" component={Checkout}/>
+                        <Route path="/orders" component={Orders}/>
+                        <Route path="/logout" component={Logout}/>
+                        <Route path="/auth" component={Auth}/>
+                        <Route path="/" exact component={BurgerBuilder}/>
+                        <Redirect to="/"/>
+                    </Switch>
+                </Suspense>
+        }
+        return (
+            <div>
+                <Layout>
+                    {routes}
+                </Layout>
+            </div>
+        );
+    }
+
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        isAuthenticated: state.auth.token !== null
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onTryAutoSignup: () => dispatch(actions.authCheckState())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
